@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const RPC_URL = 'https://rpc.testnet.soo.network/rpc';
+import { NetworkConfig } from '../config/networks';
 
 export interface Block {
   number: string;
@@ -25,9 +24,19 @@ export interface Transaction {
 }
 
 export class SoonService {
+  private static network: NetworkConfig;
+
+  static setNetwork(network: NetworkConfig) {
+    this.network = network;
+  }
+
   private static async makeRequest(method: string, params: any[] = []) {
+    if (!this.network) {
+      throw new Error('Network not configured');
+    }
+
     try {
-      const response = await axios.post(RPC_URL, {
+      const response = await axios.post(this.network.rpcUrl, {
         jsonrpc: '2.0',
         id: 1,
         method,

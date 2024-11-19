@@ -1,26 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { SoonService, Block } from '../../../services/soon.service';
+import { useNetwork } from '../../../contexts/NetworkContext';
 
 const Dashboard: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { network } = useNetwork();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const latestBlocks = await SoonService.getLatestBlocks(20);
         if (latestBlocks && Array.isArray(latestBlocks)) {
           setBlocks(latestBlocks);
-          setError(null);
         } else {
           setError('Invalid data received from the blockchain');
         }
       } catch (error) {
         console.error('Error fetching blocks:', error);
-        setError('Failed to fetch blockchain data');
+        setError('Failed to fetch blockchain data. Please check your network connection.');
         setBlocks([]);
       } finally {
         setLoading(false);
@@ -30,7 +32,7 @@ const Dashboard: React.FC = () => {
     fetchData();
     const interval = setInterval(fetchData, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [network]);
 
   const chartData = React.useMemo(() => {
     if (!blocks || !blocks.length) return [];
@@ -55,8 +57,9 @@ const Dashboard: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64 text-red-500">
-        {error}
+      <div className="flex flex-col justify-center items-center h-64 text-red-500 space-y-4">
+        <p>{error}</p>
+        <p className="text-sm">Current Network: {network.name}</p>
       </div>
     );
   }
@@ -71,7 +74,12 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Network Overview</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Network Overview</h1>
+        <div className="text-sm text-gray-400">
+          Network: {network.name}
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-gray-800 p-4 rounded-lg">
