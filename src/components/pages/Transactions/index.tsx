@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { SoonService, Transaction, Block } from '../../../services/soon.service';
+import { SoonService, Transaction } from '../../../services/soon.service';
 import { useNetwork } from '../../../contexts/NetworkContext';
+import { formatDistanceToNow } from 'date-fns';
 
 const TransactionsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -13,8 +14,6 @@ const TransactionsPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
-        // Fetch latest blocks and extract transactions
         const blocks = await SoonService.getLatestBlocks(5);
         const allTransactions = blocks.flatMap(block => block.transactions);
         setTransactions(allTransactions);
@@ -27,9 +26,27 @@ const TransactionsPage: React.FC = () => {
     };
 
     fetchTransactions();
-    const interval = setInterval(fetchTransactions, 10000);
+    const interval = setInterval(fetchTransactions, 15000);
     return () => clearInterval(interval);
   }, [network]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const formatAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
+  const formatValue = (value: string) => {
+    try {
+      const valueInSoon = parseInt(value, 16) / 1e18;
+      return `${valueInSoon.toFixed(6)} SOON`;
+    } catch {
+      return '0 SOON';
+    }
+  };
 
   if (loading) {
     return (
@@ -56,64 +73,85 @@ const TransactionsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-gray-800 rounded-lg">
-          <thead>
-            <tr className="text-left text-gray-400">
-              <th className="p-4">Transaction Hash</th>
-              <th className="p-4">From</th>
-              <th className="p-4">To</th>
-              <th className="p-4">Value</th>
-              <th className="p-4">Gas Price</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {transactions.map((tx) => (
-              <tr key={tx.hash} className="hover:bg-gray-700">
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="truncate w-32 text-primary">{tx.hash}</span>
-                    <button 
-                      onClick={() => navigator.clipboard.writeText(tx.hash)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      📋
-                    </button>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="truncate w-32">{tx.from}</span>
-                    <button 
-                      onClick={() => navigator.clipboard.writeText(tx.from)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      📋
-                    </button>
-                  </div>
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="truncate w-32">{tx.to}</span>
-                    <button 
-                      onClick={() => navigator.clipboard.writeText(tx.to)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      📋
-                    </button>
-                  </div>
-                </td>
-                <td className="p-4">
-                  {parseInt(tx.value, 16) / 1e18} SOON
-                </td>
-                <td className="p-4">
-                  {parseInt(tx.gasPrice, 16).toString()} Wei
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid gap-4">
+        {transactions.map((tx) => (
+          <div key={tx.hash} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+            <div className="flex flex-col space-y-3">
+              {/* Transaction Hash */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Tx Hash:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono text-primary">{formatAddress(tx.hash)}</span>
+                  <button 
+                    onClick={() => copyToClipboard(tx.hash)}
+                    className="p-1 hover:bg-gray-600 rounded"
+                    title="Copy transaction hash"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* From Address */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">From:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono">{formatAddress(tx.from)}</span>
+                  <button 
+                    onClick={() => copyToClipboard(tx.from)}
+                    className="p-1 hover:bg-gray-600 rounded"
+                    title="Copy sender address"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* To Address */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">To:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono">{formatAddress(tx.to)}</span>
+                  <button 
+                    onClick={() => copyToClipboard(tx.to)}
+                    className="p-1 hover:bg-gray-600 rounded"
+                    title="Copy recipient address"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Value and Slot */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-gray-400">Value:</span>
+                  <span className="ml-2">{formatValue(tx.value)}</span>
+                </div>
+                <div>
+                  <span className="text-gray-400">Slot:</span>
+                  <span className="ml-2">{tx.slot.toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {transactions.length === 0 && !loading && !error && (
+        <div className="text-center text-gray-400 py-8">
+          No transactions found
+        </div>
+      )}
     </div>
   );
 };

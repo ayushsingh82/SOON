@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SoonService, Block } from '../../../services/soon.service';
 import { useNetwork } from '../../../contexts/NetworkContext';
+import { formatDistanceToNow } from 'date-fns';
 
 const BlocksPage: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -14,7 +15,7 @@ const BlocksPage: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const latestBlocks = await SoonService.getLatestBlocks(25);
+        const latestBlocks = await SoonService.getLatestBlocks(10);
         setBlocks(latestBlocks);
       } catch (error: any) {
         console.error('Error fetching blocks:', error);
@@ -25,9 +26,18 @@ const BlocksPage: React.FC = () => {
     };
 
     fetchBlocks();
-    const interval = setInterval(fetchBlocks, 10000);
+    const interval = setInterval(fetchBlocks, 15000);
     return () => clearInterval(interval);
   }, [network]);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
+  const formatAddress = (address: string) => {
+    if (!address) return '';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   if (loading) {
     return (
@@ -54,59 +64,83 @@ const BlocksPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full bg-gray-800 rounded-lg">
-          <thead>
-            <tr className="text-left text-gray-400">
-              <th className="p-4">Block Number</th>
-              <th className="p-4">Age</th>
-              <th className="p-4">Transactions</th>
-              <th className="p-4">Gas Used</th>
-              <th className="p-4">Gas Limit</th>
-              <th className="p-4">Hash</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-700">
-            {blocks.map((block) => (
-              <tr key={block.hash} className="hover:bg-gray-700">
-                <td className="p-4">
-                  <span className="text-primary">
+      <div className="grid gap-4">
+        {blocks.map((block) => (
+          <div key={block.hash} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors">
+            <div className="flex justify-between items-start">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-400">Block</span>
+                  <span className="text-primary font-medium">
                     {parseInt(block.number, 16).toLocaleString()}
                   </span>
-                </td>
-                <td className="p-4">
-                  {new Date(parseInt(block.timestamp, 16) * 1000).toLocaleString()}
-                </td>
-                <td className="p-4">
+                </div>
+                <div className="text-sm text-gray-400">
+                  {formatDistanceToNow(new Date(parseInt(block.timestamp, 16) * 1000), { addSuffix: true })}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-sm">
+                  <span className="text-gray-400">Transactions:</span>
                   <Link 
                     to={`/blocks/${block.number}/transactions`}
-                    className="text-primary hover:underline"
+                    className="ml-2 text-primary hover:underline"
                   >
                     {block.transactions.length} txns
                   </Link>
-                </td>
-                <td className="p-4">
-                  {parseInt(block.gasUsed, 16).toLocaleString()}
-                </td>
-                <td className="p-4">
-                  {parseInt(block.gasLimit, 16).toLocaleString()}
-                </td>
-                <td className="p-4">
-                  <div className="flex items-center space-x-2">
-                    <span className="truncate w-32">{block.hash}</span>
-                    <button 
-                      onClick={() => navigator.clipboard.writeText(block.hash)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      📋
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid gap-2 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Hash:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono">{formatAddress(block.hash)}</span>
+                  <button 
+                    onClick={() => copyToClipboard(block.hash)}
+                    className="p-1 hover:bg-gray-600 rounded"
+                    title="Copy hash"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Parent Hash:</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-mono">{formatAddress(block.parentHash)}</span>
+                  <button 
+                    onClick={() => copyToClipboard(block.parentHash)}
+                    className="p-1 hover:bg-gray-600 rounded"
+                    title="Copy parent hash"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400">Slot:</span>
+                <span>{block.slot.toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
+
+      {blocks.length === 0 && !loading && !error && (
+        <div className="text-center text-gray-400 py-8">
+          No blocks found
+        </div>
+      )}
     </div>
   );
 };
