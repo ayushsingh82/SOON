@@ -14,15 +14,21 @@ const Dashboard: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
+
+        const isConnected = await SoonService.testConnection();
+        if (!isConnected) {
+          throw new Error(`Unable to connect to ${network.name} network`);
+        }
+
         const latestBlocks = await SoonService.getLatestBlocks(20);
-        if (latestBlocks && Array.isArray(latestBlocks)) {
+        if (latestBlocks && Array.isArray(latestBlocks) && latestBlocks.length > 0) {
           setBlocks(latestBlocks);
         } else {
-          setError('Invalid data received from the blockchain');
+          throw new Error('No blocks received from the network');
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching blocks:', error);
-        setError('Failed to fetch blockchain data. Please check your network connection.');
+        setError(error.message || 'Failed to fetch blockchain data');
         setBlocks([]);
       } finally {
         setLoading(false);

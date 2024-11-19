@@ -5,6 +5,7 @@ export interface NetworkConfig {
   bridgeUrl: string;
   explorerUrl: string;
   faucetUrl: string;
+  chainId: string;
 }
 
 export const NETWORKS: { [key: string]: NetworkConfig } = {
@@ -15,6 +16,7 @@ export const NETWORKS: { [key: string]: NetworkConfig } = {
     bridgeUrl: 'https://bridge.testnet.soo.network/',
     explorerUrl: 'https://explorer.testnet.soo.network/',
     faucetUrl: 'https://faucet.soo.network/',
+    chainId: '0x1',
   },
   devnet: {
     id: 'devnet',
@@ -23,6 +25,7 @@ export const NETWORKS: { [key: string]: NetworkConfig } = {
     bridgeUrl: 'https://bridge.devnet.soo.network/',
     explorerUrl: 'https://explorer.devnet.soo.network/',
     faucetUrl: 'https://faucet.soo.network/',
+    chainId: '0x2',
   },
 };
 
