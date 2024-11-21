@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { NetworkProvider } from './contexts/NetworkContext';
 import Navbar from './components/Navbar';
 import LandingPage from './components/pages/Landing';
@@ -7,27 +7,38 @@ import Dashboard from './components/pages/Dashboard';
 import Blocks from './components/pages/Blocks';
 import Transactions from './components/pages/Transactions';
 
+const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="min-h-screen bg-gray-900 text-white">
+    <Navbar />
+    <main className="container mx-auto px-4 py-8">
+      {children}
+    </main>
+  </div>
+);
+
 function App() {
   return (
     <NetworkProvider>
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route
-            path="/*"
-            element={
-              <div className="min-h-screen bg-gray-900 text-white">
-                <Navbar />
-                <main className="container mx-auto px-4 py-8">
-                  <Routes>
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="blocks" element={<Blocks />} />
-                    <Route path="transactions" element={<Transactions />} />
-                  </Routes>
-                </main>
-              </div>
-            }
-          />
+          <Route path="/dashboard" element={
+            <AppLayout>
+              <Dashboard />
+            </AppLayout>
+          } />
+          <Route path="/blocks" element={
+            <AppLayout>
+              <Blocks />
+            </AppLayout>
+          } />
+          <Route path="/transactions" element={
+            <AppLayout>
+              <Transactions />
+            </AppLayout>
+          } />
+          {/* Redirect any unknown routes to landing page */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </NetworkProvider>
