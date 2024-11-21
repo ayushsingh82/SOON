@@ -84,9 +84,9 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 mt-20">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold mt-[40px]">Network Overview</h1>
+        <h1 className="text-3xl font-bold">Network Overview</h1>
         <div className="text-sm text-gray-400">
           Network: <span className="text-primary">{network.name}</span>
         </div>

@@ -30,6 +30,7 @@ const TransactionsPage: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
   const { network } = useNetwork();
 
   useEffect(() => {
@@ -53,8 +54,10 @@ const TransactionsPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [network]);
 
-  const copyToClipboard = (text: string) => {
+  const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
+    setCopiedText(type);
+    setTimeout(() => setCopiedText(null), 2000); // Reset after 2 seconds
   };
 
   const formatAddress = (address: string) => {
@@ -80,9 +83,7 @@ const TransactionsPage: React.FC = () => {
       <div className="flex flex-col justify-center items-center h-[70vh] space-y-4">
         <div className="text-red-500 text-6xl">⚠️</div>
         <h3 className="text-xl font-semibold text-red-500">Error Loading Transactions</h3>
-        <p className="text-gray-400 text-center max-w-sm">
-          {error}
-        </p>
+        <p className="text-gray-400 text-center max-w-sm">{error}</p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-4 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
@@ -94,7 +95,7 @@ const TransactionsPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-20">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Latest Transactions</h1>
         <div className="text-sm text-gray-400">
@@ -112,14 +113,23 @@ const TransactionsPage: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <span className="font-mono text-primary">{formatAddress(tx.hash)}</span>
                   <button 
-                    onClick={() => copyToClipboard(tx.hash)}
-                    className="p-1 hover:bg-gray-600 rounded"
+                    onClick={() => copyToClipboard(tx.hash, `hash-${tx.hash}`)}
+                    className="p-1 hover:bg-gray-600 rounded group relative"
                     title="Copy transaction hash"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
+                    {copiedText === `hash-${tx.hash}` ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                      </svg>
+                    )}
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                      {copiedText === `hash-${tx.hash}` ? 'Copied!' : 'Copy hash'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -130,14 +140,23 @@ const TransactionsPage: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <span className="font-mono">{formatAddress(tx.from)}</span>
                   <button 
-                    onClick={() => copyToClipboard(tx.from)}
-                    className="p-1 hover:bg-gray-600 rounded"
+                    onClick={() => copyToClipboard(tx.from, `from-${tx.hash}`)}
+                    className="p-1 hover:bg-gray-600 rounded group relative"
                     title="Copy sender address"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
+                    {copiedText === `from-${tx.hash}` ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                      </svg>
+                    )}
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                      {copiedText === `from-${tx.hash}` ? 'Copied!' : 'Copy address'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -148,14 +167,23 @@ const TransactionsPage: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <span className="font-mono">{formatAddress(tx.to)}</span>
                   <button 
-                    onClick={() => copyToClipboard(tx.to)}
-                    className="p-1 hover:bg-gray-600 rounded"
+                    onClick={() => copyToClipboard(tx.to, `to-${tx.hash}`)}
+                    className="p-1 hover:bg-gray-600 rounded group relative"
                     title="Copy recipient address"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                    </svg>
+                    {copiedText === `to-${tx.hash}` ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-green-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                      </svg>
+                    )}
+                    <span className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                      {copiedText === `to-${tx.hash}` ? 'Copied!' : 'Copy address'}
+                    </span>
                   </button>
                 </div>
               </div>

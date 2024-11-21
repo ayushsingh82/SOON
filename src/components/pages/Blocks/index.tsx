@@ -13,7 +13,7 @@ const LoadingSpinner: React.FC = () => (
     </div>
     
     <div className="text-center space-y-2">
-      <h3 className="text-xl font-semibold text-primary">Fetching Blockchain Data</h3>
+      <h3 className="text-xl font-semibold text-primary ">Fetching Blockchain Data</h3>
       <p className="text-gray-400 max-w-sm text-sm">
         Please wait while we sync with the {' '}
         <span className="text-primary font-medium">SOON Network</span>
@@ -90,7 +90,7 @@ const BlocksPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mt-20">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Latest Blocks</h1>
         <div className="text-sm text-gray-400">
