@@ -2,7 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { SoonService, Block } from '../../../services/soon.service';
 import { useNetwork } from '../../../contexts/NetworkContext';
-import { formatDistanceToNow } from 'date-fns';
+
+const LoadingSpinner: React.FC = () => (
+  <div className="flex flex-col items-center justify-center h-[70vh] space-y-6">
+    <div className="relative">
+      {/* Outer ring */}
+      <div className="w-16 h-16 border-4 border-primary/20 rounded-full animate-pulse"></div>
+      {/* Inner spinner */}
+      <div className="absolute top-0 left-0 w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+    
+    <div className="text-center space-y-2">
+      <h3 className="text-xl font-semibold text-primary">Fetching Blockchain Data</h3>
+      <p className="text-gray-400 max-w-sm text-sm">
+        Please wait while we sync with the {' '}
+        <span className="text-primary font-medium">SOON Network</span>
+      </p>
+      <div className="flex justify-center gap-1.5 pt-2">
+        <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></span>
+        <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+        <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+      </div>
+    </div>
+  </div>
+);
 
 const BlocksPage: React.FC = () => {
   const [blocks, setBlocks] = useState<Block[]>([]);
@@ -39,18 +62,29 @@ const BlocksPage: React.FC = () => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(parseInt(timestamp, 16) * 1000);
+    return date.toLocaleTimeString();
+  };
+
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-64 text-red-500">
-        {error}
+      <div className="flex flex-col justify-center items-center h-[70vh] space-y-4">
+        <div className="text-red-500 text-6xl">⚠️</div>
+        <h3 className="text-xl font-semibold text-red-500">Error Loading Blocks</h3>
+        <p className="text-gray-400 text-center max-w-sm">
+          {error}
+        </p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -76,7 +110,7 @@ const BlocksPage: React.FC = () => {
                   </span>
                 </div>
                 <div className="text-sm text-gray-400">
-                  {formatDistanceToNow(new Date(parseInt(block.timestamp, 16) * 1000), { addSuffix: true })}
+                  {formatTimestamp(block.timestamp)}
                 </div>
               </div>
               <div className="text-right">
