@@ -25,194 +25,155 @@ export class SoonSDK {
 
   private async makeRpcRequest(method: string, params: any[] = []) {
     try {
+      console.log(`Making RPC request to ${this.config.rpcUrl}:`, { method, params });
+      
       const response = await axios.post(this.config.rpcUrl, {
         jsonrpc: '2.0',
         id: Date.now(),
         method,
         params,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       if (response.data.error) {
         throw new Error(`RPC Error: ${JSON.stringify(response.data.error)}`);
       }
 
+      console.log(`RPC Response for ${method}:`, response.data.result);
       return response.data.result;
-    } catch (error) {
-      console.error('SDK RPC Error:', error);
-      throw error;
-    }
-  }
-
-  private async makeArchiveRequest(query: string, variables: any = {}) {
-    try {
-      const response = await axios.post(this.config.archiveUrl, {
-        query,
-        variables,
+    } catch (error: any) {
+      console.error('SDK RPC Error:', {
+        method,
+        params,
+        error: error.message,
+        response: error.response?.data
       });
-
-      if (response.data.errors) {
-        throw new Error(`Archive Error: ${JSON.stringify(response.data.errors)}`);
-      }
-
-      return response.data.data;
-    } catch (error) {
-      console.error('SDK Archive Error:', error);
-      throw error;
+      throw new Error(`Failed to make RPC request: ${error.message}`);
     }
   }
 
-  // Block Methods
   async getLatestBlock(): Promise<BlockData> {
-    const slot = await this.makeRpcRequest('getSlot');
-    return this.getBlockBySlot(slot);
+    try {
+      const slot = await this.makeRpcRequest('getSlot', [{ commitment: 'finalized' }]);
+      const block = await this.getBlockBySlot(slot);
+      return block;
+    } catch (error) {
+      console.error('Error getting latest block:', error);
+      throw error;
+    }
   }
 
   async getBlockBySlot(slot: number): Promise<BlockData> {
-    const block = await this.makeRpcRequest('getBlock', [
-      slot,
-      {
-        encoding: 'json',
-        transactionDetails: 'full',
-        rewards: false,
-      },
-    ]);
-    return this.formatBlockData(block);
+    try {
+      const block = await this.makeRpcRequest('getBlock', [
+        slot,
+        {
+          encoding: 'json',
+          transactionDetails: 'full',
+          rewards: false,
+        },
+      ]);
+
+      if (!block) {
+        throw new Error(`Block not found for slot ${slot}`);
+      }
+
+      return this.formatBlockData(block);
+    } catch (error) {
+      console.error(`Error getting block ${slot}:`, error);
+      throw error;
+    }
+  }
+
+  async getTransaction(signature: string): Promise<TransactionData> {
+    try {
+      const tx = await this.makeRpcRequest('getTransaction', [
+        signature,
+        { encoding: 'json', maxSupportedTransactionVersion: 0 }
+      ]);
+
+      if (!tx) {
+        throw new Error(`Transaction not found: ${signature}`);
+      }
+
+      return this.formatTransactionData(tx);
+    } catch (error) {
+      console.error('Error getting transaction:', error);
+      throw error;
+    }
   }
 
   async getBlocks(options: QueryOptions = {}): Promise<BlockData[]> {
-    const query = `
-      query GetBlocks($limit: Int, $offset: Int, $fromBlock: Int, $toBlock: Int) {
-        blocks(
-          limit: $limit
-          offset: $offset
-          filter: { 
-            slot: { gte: $fromBlock, lte: $toBlock }
-          }
-        ) {
-          slot
-          blockhash
-          previousBlockhash
-          parentSlot
-          blockTime
-          blockHeight
-          transactions {
-            signature
-            slot
-            err
-            memo
-            blockTime
-          }
+    try {
+      const latestSlot = await this.makeRpcRequest('getSlot', [{ commitment: 'finalized' }]);
+      const blocks: BlockData[] = [];
+      
+      const limit = options.limit || 10;
+      const startSlot = options.fromBlock || latestSlot - limit;
+      
+      for (let slot = startSlot; slot < startSlot + limit; slot++) {
+        try {
+          const block = await this.getBlockBySlot(slot);
+          blocks.push(block);
+        } catch (error) {
+          console.warn(`Skipping block ${slot} due to error:`, error);
+          continue;
         }
       }
-    `;
 
-    const variables = {
-      limit: options.limit || 10,
-      offset: options.offset || 0,
-      fromBlock: options.fromBlock || this.config.firstBlock,
-      toBlock: options.toBlock,
-    };
-
-    const data = await this.makeArchiveRequest(query, variables);
-    return data.blocks.map(this.formatBlockData);
+      return blocks;
+    } catch (error) {
+      console.error('Error getting blocks:', error);
+      throw error;
+    }
   }
 
-  // Transaction Methods
-  async getTransaction(signature: string): Promise<TransactionData> {
-    const tx = await this.makeRpcRequest('getTransaction', [
-      signature,
-      { encoding: 'json' },
-    ]);
-    return this.formatTransactionData(tx);
-  }
-
-  async getTransactions(options: QueryOptions = {}): Promise<TransactionData[]> {
-    const query = `
-      query GetTransactions($limit: Int, $offset: Int, $startTime: Int, $endTime: Int) {
-        transactions(
-          limit: $limit
-          offset: $offset
-          filter: {
-            blockTime: { gte: $startTime, lte: $endTime }
-          }
-        ) {
-          signature
-          slot
-          err
-          memo
-          blockTime
-        }
-      }
-    `;
-
-    const variables = {
-      limit: options.limit || 10,
-      offset: options.offset || 0,
-      startTime: options.startTime,
-      endTime: options.endTime,
-    };
-
-    const data = await this.makeArchiveRequest(query, variables);
-    return data.transactions.map(this.formatTransactionData);
-  }
-
-  // Account Methods
   async getAccountInfo(address: string): Promise<AccountInfo> {
-    const [accountInfo, transactions] = await Promise.all([
-      this.makeRpcRequest('getAccountInfo', [address]),
-      this.getAccountTransactions(address),
-    ]);
+    try {
+      const [accountInfo, transactions] = await Promise.all([
+        this.makeRpcRequest('getAccountInfo', [address, { encoding: 'jsonParsed' }]),
+        this.getAccountTransactions(address)
+      ]);
 
-    return {
-      address,
-      balance: accountInfo.lamports / 1e9,
-      transactions,
-    };
+      return {
+        address,
+        balance: accountInfo?.lamports ? accountInfo.lamports / 1e9 : 0,
+        transactions
+      };
+    } catch (error) {
+      console.error('Error getting account info:', error);
+      throw error;
+    }
   }
 
-  async getAccountTransactions(
-    address: string,
-    options: QueryOptions = {}
-  ): Promise<TransactionData[]> {
-    const query = `
-      query GetAccountTransactions($address: String!, $limit: Int, $offset: Int) {
-        transactions(
-          limit: $limit
-          offset: $offset
-          filter: {
-            or: [
-              { srcAddress: { eq: $address } }
-              { dstAddress: { eq: $address } }
-            ]
-          }
-        ) {
-          signature
-          slot
-          err
-          memo
-          blockTime
-        }
-      }
-    `;
+  private async getAccountTransactions(address: string): Promise<TransactionData[]> {
+    try {
+      const signatures = await this.makeRpcRequest('getSignaturesForAddress', [
+        address,
+        { limit: 10 }
+      ]);
 
-    const variables = {
-      address,
-      limit: options.limit || 10,
-      offset: options.offset || 0,
-    };
+      const transactions = await Promise.all(
+        signatures.map((sig: any) => this.getTransaction(sig.signature))
+      );
 
-    const data = await this.makeArchiveRequest(query, variables);
-    return data.transactions.map(this.formatTransactionData);
+      return transactions;
+    } catch (error) {
+      console.error('Error getting account transactions:', error);
+      return [];
+    }
   }
 
-  // Helper Methods
   private formatBlockData(block: any): BlockData {
     return {
       slot: block.slot,
       blockhash: block.blockhash,
       previousBlockhash: block.previousBlockhash,
       parentSlot: block.parentSlot,
-      transactions: block.transactions.map(this.formatTransactionData),
+      transactions: block.transactions?.map(this.formatTransactionData) || [],
       blockTime: block.blockTime,
       blockHeight: block.blockHeight,
     };
@@ -220,15 +181,15 @@ export class SoonSDK {
 
   private formatTransactionData(tx: any): TransactionData {
     return {
-      signature: tx.signature,
+      signature: tx.transaction?.signatures?.[0] || tx.signature,
       slot: tx.slot,
       err: tx.err,
       memo: tx.memo,
       blockTime: tx.blockTime,
       confirmationStatus: tx.confirmationStatus,
-      from: tx.from,
-      to: tx.to,
-      amount: tx.amount,
+      from: tx.transaction?.message?.accountKeys?.[0] || '',
+      to: tx.transaction?.message?.accountKeys?.[1] || '',
+      amount: tx.meta?.postBalances?.[1] - tx.meta?.preBalances?.[1] || 0,
     };
   }
 } 

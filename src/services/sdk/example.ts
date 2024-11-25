@@ -1,3 +1,5 @@
+import { SoonSDK } from './SoonSDK';
+
 // Initialize SDK
 const sdk = SoonSDK.initialize({
   rpcUrl: 'https://rpc.devnet.soo.network/rpc',
@@ -6,19 +8,51 @@ const sdk = SoonSDK.initialize({
 });
 
 // Example usage
-async function example() {
-  // Get latest block
-  const latestBlock = await sdk.getLatestBlock();
+export const sdkExamples = {
+  getLatestBlock: async () => {
+    try {
+      const latestBlock = await sdk.getLatestBlock();
+      console.log('Latest Block:', latestBlock);
+      return latestBlock;
+    } catch (error) {
+      console.error('Error fetching latest block:', error);
+      throw error;
+    }
+  },
 
-  // Get multiple blocks
-  const blocks = await sdk.getBlocks({
-    limit: 10,
-    fromBlock: 2471640,
-  });
+  getBlocks: async () => {
+    try {
+      const blocks = await sdk.getBlocks({
+        limit: 10,
+        fromBlock: 2471640,
+      });
+      console.log('Blocks:', blocks);
+      return blocks;
+    } catch (error) {
+      console.error('Error fetching blocks:', error);
+      throw error;
+    }
+  },
 
-  // Get transaction
-  const tx = await sdk.getTransaction('signature...');
+  getTransaction: async (signature: string) => {
+    try {
+      const tx = await sdk.getTransaction(signature);
+      console.log('Transaction:', tx);
+      return tx;
+    } catch (error) {
+      console.error('Error fetching transaction:', error);
+      throw error;
+    }
+  },
 
-  // Get account info and transactions
-  const accountInfo = await sdk.getAccountInfo('address...');
-} 
+  getAccountInfo: async (address: string) => {
+    try {
+      const accountInfo = await sdk.getAccountInfo(address);
+      console.log('Account Info:', accountInfo);
+      return accountInfo;
+    } catch (error) {
+      console.error('Error fetching account info:', error);
+      throw error;
+    }
+  }
+}; 

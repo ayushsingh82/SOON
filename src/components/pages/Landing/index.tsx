@@ -63,8 +63,8 @@ const LandingPage: React.FC = () => {
                 SOON Network
               </span>
               <br />
-              <span className="text-4xl md:text-6xl text-white mt-4 block">
-                Blockchain Explorer
+              <span className="text-2xl md:text-5xl text-white mt-4 block">
+                Blockchain Explorer & Soon developer SDK 
               </span>
             </h1>
             <p className="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed">
@@ -100,45 +100,124 @@ const LandingPage: React.FC = () => {
         {/* Features Grid */}
         <div className="bg-black/50 py-32">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 animate-on-scroll opacity-0">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700">
-                Powerful Features
-              </span>
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: "⚡",
-                  title: "Lightning Fast",
-                  description: "Experience blazing-fast block confirmations and real-time transaction processing with SOON Network's advanced infrastructure."
-                },
-                {
-                  icon: "🔍",
-                  title: "Advanced Analytics",
-                  description: "Dive deep into network metrics, analyze transaction patterns, and monitor blockchain health with our comprehensive tools."
-                },
-                {
-                  icon: "🌉",
-                  title: "Seamless Bridge",
-                  description: "Transfer assets effortlessly between SOON Network and other blockchains with our secure cross-chain bridge technology."
-                }
-              ].map((feature, index) => (
-                <div
-                  key={index}
-                  className="group bg-gray-900/30 p-8 rounded-xl hover:bg-gray-800/40 transition-all duration-500 transform hover:-translate-y-2 animate-on-scroll opacity-0 hover:shadow-2xl hover:shadow-red-900/20"
-                  style={{ animationDelay: `${index * 200}ms` }}
-                >
-                  <div className="text-5xl mb-6 transform group-hover:scale-110 transition-transform duration-300">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3 text-red-500 group-hover:text-red-400 transition-colors">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-400 leading-relaxed">
-                    {feature.description}
-                  </p>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700">
+                Powerful Tools for Developers
+              </h2>
+            </div>
+
+            {/* Explorer Features */}
+            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-20">
+              <div className="bg-gray-900/30 p-8 rounded-xl hover:bg-gray-800/40 transition-all duration-500 transform hover:-translate-y-2 group">
+                <div className="space-y-4">
+                  <div className="text-4xl">🔍</div>
+                  <h3 className="text-2xl font-bold text-red-500">Blockchain Explorer</h3>
+                  <ul className="space-y-3 text-gray-400">
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Real-time block and transaction tracking
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Detailed transaction analysis
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Account balance monitoring
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Network statistics
+                    </li>
+                  </ul>
+                  <Link
+                    to="/dashboard"
+                    className="inline-block mt-4 text-red-500 hover:text-red-400 transition-colors"
+                  >
+                    Launch Explorer →
+                  </Link>
                 </div>
-              ))}
+              </div>
+
+              {/* SDK Overview Card */}
+              <div className="bg-gray-900/30 p-8 rounded-xl hover:bg-gray-800/40 transition-all duration-500 transform hover:-translate-y-2 group">
+                <div className="space-y-4">
+                  <div className="text-4xl">⚡</div>
+                  <h3 className="text-2xl font-bold text-red-500">Developer SDK</h3>
+                  <ul className="space-y-3 text-gray-400">
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Easy-to-use API integration
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Comprehensive documentation
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      TypeScript support
+                    </li>
+                    <li className="flex items-center">
+                      <span className="mr-2">✓</span>
+                      Real-time data queries
+                    </li>
+                  </ul>
+                  <Link
+                    to="/sdk"
+                    className="inline-block mt-4 text-red-500 hover:text-red-400 transition-colors"
+                  >
+                    View SDK Docs →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* SDK Features Section */}
+            <div className="mt-32">
+              <h2 className="text-3xl font-bold text-center mb-16">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-500 to-red-700">
+                  Comprehensive SDK Features
+                </span>
+              </h2>
+              <div className="grid md:grid-cols-3 gap-8">
+                {/* Block Operations */}
+                <div className="bg-gray-900/30 p-6 rounded-xl hover:bg-gray-800/40 transition-all duration-300">
+                  <div className="text-3xl mb-4">📦</div>
+                  <h3 className="text-xl font-semibold text-red-500 mb-4">Block Operations</h3>
+                  <ul className="space-y-2 text-gray-400 text-sm">
+                    <li>• Get latest block data</li>
+                    <li>• Fetch block by slot number</li>
+                    <li>• Block history pagination</li>
+                    <li>• Block transaction details</li>
+                  </ul>
+                </div>
+
+                {/* Transaction Handling */}
+                <div className="bg-gray-900/30 p-6 rounded-xl hover:bg-gray-800/40 transition-all duration-300">
+                  <div className="text-3xl mb-4">💫</div>
+                  <h3 className="text-xl font-semibold text-red-500 mb-4">Transaction Handling</h3>
+                  <ul className="space-y-2 text-gray-400 text-sm">
+                    <li>• Transaction lookup by signature</li>
+                    <li>• Transaction status tracking</li>
+                    <li>• Detailed transaction analysis</li>
+                    <li>• Transaction history by account</li>
+                  </ul>
+                </div>
+
+                {/* Account Management */}
+                <div className="bg-gray-900/30 p-6 rounded-xl hover:bg-gray-800/40 transition-all duration-300">
+                  <div className="text-3xl mb-4">👤</div>
+                  <h3 className="text-xl font-semibold text-red-500 mb-4">Account Management</h3>
+                  <ul className="space-y-2 text-gray-400 text-sm">
+                    <li>• Account balance queries</li>
+                    <li>• Transaction history</li>
+                    <li>• Account activity monitoring</li>
+                    <li>• Real-time updates</li>
+                  </ul>
+                </div>
+              </div>
+
+              
             </div>
           </div>
         </div>
