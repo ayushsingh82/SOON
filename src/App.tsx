@@ -6,6 +6,7 @@ import LandingPage from './components/pages/Landing';
 import Dashboard from './components/pages/Dashboard';
 import Blocks from './components/pages/Blocks';
 import Transactions from './components/pages/Transactions';
+import SDKDocs from './components/pages/SDKDocs';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="min-h-screen bg-gray-900 text-white">
@@ -37,7 +38,11 @@ function App() {
               <Transactions />
             </AppLayout>
           } />
-          {/* Redirect any unknown routes to landing page */}
+          <Route path="/sdk" element={
+            <AppLayout>
+              <SDKDocs />
+            </AppLayout>
+          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
