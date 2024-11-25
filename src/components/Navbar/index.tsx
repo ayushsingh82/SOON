@@ -6,6 +6,7 @@ const Navbar: React.FC = () => {
   const { network, setNetworkById, availableNetworks } = useNetwork();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [sdkOpen, setSDKOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +20,13 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const sdkExamples = [
+    { title: 'Get Latest Block', code: 'const latestBlock = await sdk.getLatestBlock();' },
+    { title: 'Get Multiple Blocks', code: 'const blocks = await sdk.getBlocks({ limit: 10 });' },
+    { title: 'Get Transaction', code: 'const tx = await sdk.getTransaction(signature);' },
+    { title: 'Get Account Info', code: 'const account = await sdk.getAccountInfo(address);' },
+  ];
 
   return (
     <nav
@@ -63,6 +71,84 @@ const Navbar: React.FC = () => {
                 />
               </Link>
             ))}
+
+            {/* SDK Dropdown */}
+            <div className="relative group">
+              <button
+                onClick={() => setSDKOpen(!sdkOpen)}
+                className="px-4 py-2 rounded-lg transition-all duration-200 text-gray-300 hover:text-white flex items-center space-x-1"
+              >
+                <span>SDK</span>
+                <svg
+                  className={`w-4 h-4 transition-transform duration-200 ${
+                    sdkOpen ? 'transform rotate-180' : ''
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* SDK Dropdown Menu */}
+              <div
+                className={`absolute right-0 mt-2 w-96 bg-gray-800 rounded-lg shadow-xl transition-all duration-200 ${
+                  sdkOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
+                }`}
+              >
+                <div className="p-4 space-y-4">
+                  {/* SDK Info */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-red-500">SOON Network SDK</h3>
+                    <p className="mt-1 text-sm text-gray-400">
+                      A powerful SDK for interacting with the SOON Network
+                    </p>
+                  </div>
+
+                  {/* Quick Examples */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-red-500">Quick Examples</h3>
+                    <div className="mt-2 space-y-2">
+                      {sdkExamples.map((example, index) => (
+                        <div key={index} className="p-2 rounded-lg bg-gray-900/50 hover:bg-gray-700/50 transition-colors">
+                          <p className="text-xs text-gray-400">{example.title}</p>
+                          <code className="block mt-1 text-xs font-mono text-red-400">
+                            {example.code}
+                          </code>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* SDK Setup */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-red-500">Setup</h3>
+                    <div className="mt-2 p-2 rounded-lg bg-gray-900/50">
+                      <code className="block text-xs font-mono text-red-400">
+                        const sdk = SoonSDK.initialize({'{'}<br/>
+                        &nbsp;&nbsp;rpcUrl: "{network.rpcUrl}",<br/>
+                        &nbsp;&nbsp;archiveUrl: "https://v2.archive.subsquid.io/network/soon-devnet",<br/>
+                        &nbsp;&nbsp;firstBlock: 2471639<br/>
+                        {'}'});
+                      </code>
+                    </div>
+                  </div>
+
+                  {/* Links */}
+                  <div className="pt-2 border-t border-gray-700">
+                    <a
+                      href="https://github.com/your-repo/soon-sdk"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                    >
+                      View on GitHub →
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Network Selector */}
@@ -78,46 +164,6 @@ const Navbar: React.FC = () => {
                 </option>
               ))}
             </select>
-
-            {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 rounded-lg hover:bg-gray-800 transition-colors">
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation - Show/Hide based on menu state */}
-        <div className="md:hidden">
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {[
-              { path: '/dashboard', label: 'Dashboard' },
-              { path: '/blocks', label: 'Blocks' },
-              { path: '/transactions', label: 'Transactions' },
-            ].map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`block px-3 py-2 rounded-lg text-base font-medium transition-colors ${
-                  isActive(item.path)
-                    ? 'text-red-500 bg-red-500/10'
-                    : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
           </div>
         </div>
       </div>
