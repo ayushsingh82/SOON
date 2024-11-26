@@ -1,16 +1,13 @@
 # Dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.js
 
-# Testing
-/coverage
+# Build
+dist
+build
 
-# Production
-/dist
-/build
-
-# Environment files
+# Environment
 .env
 .env.local
 .env.development.local
@@ -24,7 +21,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Editor directories and files
+# Editor
 .vscode/*
 !.vscode/extensions.json
 .idea
@@ -36,7 +33,4 @@ lerna-debug.log*
 *.sw?
 
 # TypeScript
-*.tsbuildinfo
-
-# Vite
-vite.config.ts.timestamp-* 
+*.tsbuildinfo 

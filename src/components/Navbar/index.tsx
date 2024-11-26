@@ -6,7 +6,6 @@ const Navbar: React.FC = () => {
   const { network, setNetworkById, availableNetworks } = useNetwork();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [sdkOpen, setSDKOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,13 +19,6 @@ const Navbar: React.FC = () => {
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-
-  const sdkExamples = [
-    { title: 'Get Latest Block', code: 'const latestBlock = await sdk.getLatestBlock();' },
-    { title: 'Get Multiple Blocks', code: 'const blocks = await sdk.getBlocks({ limit: 10 });' },
-    { title: 'Get Transaction', code: 'const tx = await sdk.getTransaction(signature);' },
-    { title: 'Get Account Info', code: 'const account = await sdk.getAccountInfo(address);' },
-  ];
 
   return (
     <nav
@@ -53,6 +45,7 @@ const Navbar: React.FC = () => {
               { path: '/dashboard', label: 'Dashboard' },
               { path: '/blocks', label: 'Blocks' },
               { path: '/transactions', label: 'Transactions' },
+              { path: '/sdk', label: 'SDK' }
             ].map((item) => (
               <Link
                 key={item.path}
@@ -71,29 +64,6 @@ const Navbar: React.FC = () => {
                 />
               </Link>
             ))}
-
-            {/* SDK Dropdown */}
-            <div className="relative group">
-              <Link
-                to="/sdk"
-                className="px-4 py-2 rounded-lg transition-all duration-200 text-gray-300 hover:text-white flex items-center space-x-1"
-              >
-                <span>SDK</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Link>
-            </div>
           </div>
 
           {/* Network Selector */}

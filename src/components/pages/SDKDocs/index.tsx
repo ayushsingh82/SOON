@@ -70,9 +70,9 @@ console.log('Account Info:', accountInfo);`
       <div className="space-y-4">
         <h2 className="text-2xl font-semibold">Getting Started</h2>
         <div className="bg-gray-800 rounded-lg p-4 relative group">
-          <code className="text-sm text-red-400">npm install @soon/sdk</code>
+          <code className="text-sm text-red-400">npm install @soon-network/sdk</code>
           <button
-            onClick={() => copyToClipboard('npm install @soon/sdk', -1)}
+            onClick={() => copyToClipboard('npm install @soon-network/sdk', -1)}
             className="absolute top-2 right-2 p-2 rounded-lg bg-gray-700/50 opacity-0 group-hover:opacity-100 transition-opacity"
             title="Copy to clipboard"
           >
