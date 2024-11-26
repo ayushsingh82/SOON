@@ -16,8 +16,7 @@ export class SoonSDK {
     return SoonSDK.instance;
   }
 
-  // Add the rest of the SDK implementation here
-  // ... (copy from the previous implementation)
+  // Add SDK methods here
 }
 
 export default SoonSDK; 

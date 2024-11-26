@@ -1,2 +1,2 @@
 export * from './types';
-export * from './sdk'; 
+export { default as SoonSDK } from './sdk'; 
