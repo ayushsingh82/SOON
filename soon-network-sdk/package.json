@@ -1,6 +1,6 @@
 {
   "name": "soon-blockchain-sdk",
-  "version": "0.1.0",
+  "version": "0.1.3",
   "description": "Official SDK for SOON Network blockchain",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -30,4 +30,4 @@
   "publishConfig": {
     "access": "public"
   }
-} 
+}

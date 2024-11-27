@@ -10,7 +10,7 @@ Install the SOON Network SDK using npm:
 
 ```bash
 
-npm install @soon-network/sdk
+npm install soon-blockchain-sdk
 
 
 #Installation & Setup
